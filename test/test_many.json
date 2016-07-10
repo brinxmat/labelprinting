@@ -1,0 +1,30 @@
+[{
+  "biblio": "09999999",
+  "title": "Test two 1",
+  "creator": "One Testson",
+  "publicationDate": "2012",
+  "holdingBranch": "HUTL",
+  "callNumber": "820 Tes",
+  "barcode": "03019999999001",
+  "copyNumber": "1"
+},
+{
+  "biblio": "011111111",
+  "title": "Test two 2",
+  "creator": "One Testsonson",
+  "publicationDate": "2013",
+  "holdingBranch": "HUTL",
+  "callNumber": "820 Tes",
+  "barcode": "030101111111002",
+  "copyNumber": "2"
+},
+{
+  "biblio": "0123125",
+  "title": "Test two 3",
+  "creator": "One Testsonsonson",
+  "publicationDate": "2014",
+  "holdingBranch": "HUTL",
+  "callNumber": "820 Tes",
+  "barcode": "03010123125003",
+  "copyNumber": "3"
+}]
