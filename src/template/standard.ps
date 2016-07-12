@@ -1,0 +1,697 @@
+%!PS
+%%Basic label DYMO 34-4814
+
+% The interleaved 2 of 5 barcode generation code is copy/pasted 
+% from https://github.com/bwipp/postscriptbarcode
+% specifically barcode_with_sample.ps in the monolithic distribution
+%
+% As such, the code here is Copyright (c) 2004-2014 Terry Burton and is distributed
+% under and MIT licence (https://opensource.org/licenses/MIT)
+
+% DON'T YOU BE EDITING HERE!! 
+% (find: BANANASPLIT)
+
+% --BEGIN RESOURCE preamble--
+%%BeginResource: Category uk.co.terryburton.bwipp 0.0 2016060300 31191 34576
+%%BeginData:          6 ASCII Lines
+currentglobal
+true setglobal
+/Generic /Category findresource dup length 1 add dict copy dup
+/InstanceType /setpacking where {{pop /packedarraytype}} {{/arraytype}} ifelse put
+/uk.co.terryburton.bwipp exch /Category defineresource pop
+setglobal
+%%EndData
+%%EndResource
+% --END RESOURCE preamble--
+
+% --BEGIN RESOURCE raiseerror--
+% --REQUIRES preamble--
+%%BeginResource: uk.co.terryburton.bwipp raiseerror 0.0 2016060300 44890 44440
+%%BeginData:         13 ASCII Lines
+/setpacking where {{pop currentpacking true setpacking}} if
+1 dict
+begin
+/raiseerror {{
+  $error exch /errorinfo exch put
+  $error exch /errorname exch put
+  $error /command null put
+  $error /newerror true put 
+  handleerror quit
+}} bind def
+/raiseerror dup load /uk.co.terryburton.bwipp defineresource pop
+end
+/setpacking where {{pop setpacking}} if
+%%EndData
+%%EndResource
+% --END RESOURCE raiseerror--
+
+% --BEGIN RENDERER renlinear--
+% --REQUIRES preamble raiseerror--
+%%BeginResource: uk.co.terryburton.bwipp renlinear 0.0 2016060300 76908 76502
+%%BeginData:        237 ASCII Lines
+/setpacking where {{pop currentpacking true setpacking}} if
+1 dict
+dup /raiseerror dup /uk.co.terryburton.bwipp findresource put
+begin
+/renlinear {{
+
+    20 dict begin          % Confine variables to local scope
+
+    /args exch def   % We are given some arguments
+
+    % Default options
+    /sbs [] def
+    /bhs [] def
+    /bbs [] def
+    /txt [] def
+    /barcolor (unset) def
+    /includetext false def
+    /textcolor (unset) def
+    /textxalign (unset) def
+    /textyalign (unset) def
+    /textfont (Courier) def
+    /textsize 10 def
+    /textxoffset 0 def
+    /textyoffset 0 def
+    /textgaps 0 def
+    /alttext () def
+    /bordercolor (unset) def
+    /backgroundcolor (unset) def
+    /inkspread 0.15 def
+    /width 0 def
+    /barratio 1 def
+    /spaceratio 1 def
+    /showborder false def
+    /borderleft 10 def
+    /borderright 10 def
+    /bordertop 1 def
+    /borderbottom 1 def
+    /borderwidth 0.5 def
+    /guardwhitespace false def
+    /guardleftpos 0 def
+    /guardleftypos 0 def
+    /guardrightpos 0 def
+    /guardrightypos 0 def
+    /guardwidth 6 def
+    /guardheight 7 def
+    
+    % Apply the renderer options and the user options
+    args {{def}} forall
+    opt {{def}} forall 
+
+    /barcolor barcolor cvlit def
+    /textcolor textcolor cvlit def
+    /textxalign textxalign cvlit def
+    /textyalign textyalign cvlit def
+    /textfont textfont cvlit def
+    /textsize textsize cvr def
+    /textxoffset textxoffset cvr def
+    /textyoffset textyoffset cvr def
+    /textgaps textgaps cvr def
+    /alttext alttext cvlit def
+    /bordercolor bordercolor cvlit def
+    /backgroundcolor backgroundcolor cvlit def
+    /inkspread inkspread cvr def
+    /width width cvr def
+    /barratio barratio cvr def
+    /spaceratio spaceratio cvr def
+    /borderleft borderleft cvr def
+    /borderright borderright cvr def
+    /bordertop bordertop cvr def
+    /borderbottom borderbottom cvr def
+    /borderwidth borderwidth cvr def
+    /guardleftpos guardleftpos cvr def
+    /guardleftypos guardleftypos cvr def
+    /guardrightpos guardrightpos cvr def
+    /guardrightypos guardrightypos cvr def
+    /guardwidth guardwidth cvr def
+    /guardheight guardheight cvr def
+    
+    % Create bar elements and put them into the bars array
+    /bars sbs length 1 add 2 idiv array def
+    /x 0.00 def /maxh 0 def
+    0 1 sbs length 1 add 2 idiv 2 mul 2 sub {{
+        /i exch def
+        i 2 mod 0 eq {{           % i is even
+            /d sbs i get barratio mul barratio sub 1 add def  % d=digit*r-r+1
+            sbs i get 0 ne {{
+                /h bhs i 2 idiv get 72 mul def  % Height from bhs
+                /c d 2 div x add def            % Centre of the bar = x + d/2
+                /y bbs i 2 idiv get 72 mul def  % Baseline from bbs
+                /w d inkspread sub def          % bar width = digit - inkspread
+                bars i 2 idiv [h c y w] put     % Add the bar entry
+                h y add maxh gt {{/maxh h y add def}} if
+            }} {{
+                bars i 2 idiv -1 put            % Dummy entry
+            }} ifelse
+        }} {{
+            /d sbs i get spaceratio mul spaceratio sub 1 add def  % d=digit*r-r+1 
+        }} ifelse
+        /x x d add def  % x+=d
+    }} for
+
+    gsave
+
+    currentpoint translate
+
+    % Force symbol to given width
+    width 0 ne {{
+        width 72 mul x div 1 scale
+    }} if
+
+    % Set RGB or CMYK color depending on length of given hex string
+    /setanycolor {{
+        /anycolor exch def
+        anycolor length 6 eq {{
+            (<      >) 8 string copy dup 1 anycolor putinterval cvx exec {{255 div}} forall setrgbcolor
+        }} if
+        anycolor length 8 eq {{
+            (<        >) 10 string copy dup 1 anycolor putinterval cvx exec {{255 div}} forall setcmykcolor
+        }} if
+    }} bind def
+
+    % Display the border and background
+    newpath
+    borderleft neg borderbottom neg moveto
+    x borderleft add borderright add 0 rlineto
+    0 maxh borderbottom add bordertop add rlineto
+    x borderleft add borderright add neg 0 rlineto
+    0 maxh borderbottom add bordertop add neg rlineto    
+    closepath
+    backgroundcolor (unset) ne {{ gsave backgroundcolor setanycolor fill grestore }} if     
+    showborder {{
+        gsave
+        bordercolor (unset) ne {{ bordercolor setanycolor }} if
+        borderwidth setlinewidth stroke
+        grestore
+    }} if    
+   
+    % Display the bars for elements in the bars array
+    gsave
+    0 setlinecap
+    barcolor (unset) ne {{ barcolor setanycolor }} if
+    bars {{
+        dup -1 ne {{
+            aload pop newpath setlinewidth moveto 0 exch rlineto stroke
+        }} {{
+            pop
+        }} ifelse
+    }} forall
+    grestore
+    
+    % Display the text for elements in the text array
+    textcolor (unset) ne {{ textcolor setanycolor }} if
+    includetext {{
+        textxalign (unset) eq textyalign (unset) eq and alttext () eq and {{
+            /s 0 def /fn () def
+            txt {{
+                {{}} forall
+                2 copy s ne exch fn ne or {{
+                    2 copy /s exch def /fn exch def            
+                    exch findfont exch scalefont setfont          
+                }} {{
+                    pop pop
+                }} ifelse
+                moveto show
+            }} forall
+        }} {{
+            textfont findfont textsize scalefont setfont
+            alttext () eq {{
+                /txt [ txt {{ 0 get {{}} forall }} forall ] def
+                /tstr txt length string def
+                0 1 txt length 1 sub {{ dup txt exch get tstr 3 1 roll put }} for
+            }} {{
+                /tstr alttext def
+            }} ifelse
+
+            % Find true ascent of font
+            tstr length 0 eq {{
+                0
+            }} {{
+                gsave
+                newpath 0 0 moveto (0) false charpath pathbbox
+                4 1 roll pop pop pop
+                grestore
+                currentfont /PaintType known {{currentfont /PaintType get 2 eq}} {{false}} ifelse
+                currentfont /StrokeWidth known and {{
+                    currentfont /StrokeWidth get 2 div 0 exch
+                    currentfont /FontMatrix get dtransform
+                    dup mul exch dup mul add sqrt
+                    add
+                }} if
+            }} ifelse
+            /textascent exch def
+            /textwidth tstr stringwidth pop tstr length 1 sub textgaps mul add def
+
+            /textxpos textxoffset x textwidth sub 2 div add def
+            textxalign (left) eq {{ /textxpos textxoffset def }} if
+            textxalign (right) eq {{ /textxpos x textxoffset sub textwidth sub def }} if
+            textxalign (offleft) eq {{ /textxpos textwidth textxoffset add neg def }} if
+            textxalign (offright) eq {{ /textxpos x textxoffset add def }} if
+            textxalign (justify) eq textwidth x lt and {{
+                /textxpos 0 def
+                /textgaps x textwidth sub tstr length 1 sub div def
+            }} if
+            /textypos textyoffset textascent add 1 add neg def
+            textyalign (above) eq {{ /textypos textyoffset maxh add 1 add def }} if
+            textyalign (center) eq {{ /textypos textyoffset maxh textascent sub 2 div add def }} if
+            textxpos textypos moveto textgaps 0 tstr ashow
+        }} ifelse
+    }} if    
+
+    % Display the guard elements
+    guardwhitespace {{
+        0.75 setlinewidth
+        guardleftpos 0 ne {{
+            newpath
+            guardleftpos neg guardwidth add guardleftypos guardwidth 2 div add moveto
+            guardwidth neg guardheight -2 div rlineto
+            guardwidth guardheight -2 div rlineto
+            stroke            
+        }} if
+        guardrightpos 0 ne {{
+            newpath
+            guardrightpos x add guardwidth sub guardrightypos guardheight 2 div add moveto
+            guardwidth guardheight -2 div rlineto
+            guardwidth neg guardheight -2 div rlineto
+            stroke            
+        }} if
+    }} if
+    
+    grestore
+    
+    end
+
+}} bind def
+/renlinear dup load /uk.co.terryburton.bwipp defineresource pop
+end
+/setpacking where {{pop setpacking}} if
+%%EndData
+%%EndResource
+% --END RENDERER renlinear--
+
+% --BEGIN RENDERER renmatrix--
+% --REQUIRES preamble raiseerror--
+%%BeginResource: uk.co.terryburton.bwipp renmatrix 0.0 2016060300 54074 54076
+%%BeginData:         66 ASCII Lines
+/setpacking where {{pop currentpacking true setpacking}} if
+1 dict
+dup /raiseerror dup /uk.co.terryburton.bwipp findresource put
+begin
+/renmatrix {{
+
+    20 dict begin
+
+    /args exch def
+
+    % Default options
+    /width 1 def
+    /height 1 def
+    /barcolor (unset) def
+    /backgroundcolor (unset) def
+
+    % Apply the renderer options and the user options
+    args {{def}} forall
+    opt {{def}} forall
+
+    /width width cvr def
+    /height height cvr def
+    /barcolor barcolor cvlit def
+    /backgroundcolor backgroundcolor cvlit def
+
+    % Set RGB or CMYK color depending on length of given hex string
+    /setanycolor {{
+        /anycolor exch def
+        anycolor length 6 eq {{
+            (<      >) 8 string copy dup 1 anycolor putinterval cvx exec {{255 div}} forall setrgbcolor
+        }} if
+        anycolor length 8 eq {{
+            (<        >) 10 string copy dup 1 anycolor putinterval cvx exec {{255 div}} forall setcmykcolor
+        }} if
+    }} bind def
+
+    % Draw the image
+    gsave
+    currentpoint translate
+    width pixx div 72 mul height pixy div 72 mul scale
+    0 0 moveto pixx 0 lineto pixx pixy lineto 0 pixy lineto closepath
+    backgroundcolor (unset) ne {{ gsave backgroundcolor setanycolor fill grestore }} if 
+    barcolor (unset) ne {{ barcolor setanycolor }} if
+    /xyget {{pixx mul add get}} bind def
+    newpath
+    0 1 pixs length 1 sub {{
+        dup pixx mod /x exch def
+        pixx idiv /y exch def
+        pixs x y xyget 1 eq {{
+           x pixy y sub 1 sub moveto
+           0 1 rlineto
+           1 0 rlineto
+           0 -1 rlineto
+           -1 0 rlineto
+           closepath
+        }} if
+    }} for
+    fill
+    grestore
+
+    end
+
+}} bind def
+/renmatrix dup load /uk.co.terryburton.bwipp defineresource pop
+end
+/setpacking where {{pop setpacking}} if
+%%EndData
+%%EndResource
+% --END RENDERER renmatrix--
+
+% --BEGIN RENDERER renmaximatrix--
+% --REQUIRES preamble raiseerror--
+%%BeginResource: uk.co.terryburton.bwipp renmaximatrix 0.0 2016060300 55426 55272
+%%BeginData:         79 ASCII Lines
+/setpacking where {{pop currentpacking true setpacking}} if
+1 dict
+dup /raiseerror dup /uk.co.terryburton.bwipp findresource put
+begin
+/renmaximatrix {{
+
+    20 dict begin
+
+    /args exch def   % We are given some arguments
+
+    % Default options
+    /barcolor (unset) def
+    /backgroundcolor (unset) def
+
+    % Apply the renderer options and the user options
+    args {{def}} forall
+    opt {{def}} forall
+
+    /barcolor barcolor cvlit def
+    /backgroundcolor backgroundcolor cvlit def
+
+    % Set RGB or CMYK color depending on length of given hex string
+    /setanycolor {{
+        /anycolor exch def
+        anycolor length 6 eq {{
+            (<      >) 8 string copy dup 1 anycolor putinterval cvx exec {{255 div}} forall setrgbcolor
+        }} if
+        anycolor length 8 eq {{
+            (<        >) 10 string copy dup 1 anycolor putinterval cvx exec {{255 div}} forall setcmykcolor
+        }} if
+    }} bind def
+
+    gsave
+
+    currentpoint translate
+
+    2.4945 dup scale  % from 1pt to 1.88mm
+
+    0 0 moveto 30 0 lineto 30 29 lineto 0 29 lineto closepath
+    backgroundcolor (unset) ne {{ gsave backgroundcolor setanycolor fill grestore }} if 
+    barcolor (unset) ne {{ barcolor setanycolor }} if
+
+    0.5 0.5774 translate
+
+    newpath
+    pixs {{
+        dup 
+        /x exch 30 mod def 
+        /y exch 30 idiv def
+        y 2 mod 0 eq {{x}} {{x 0.5 add}} ifelse
+        32 y sub 0.8661 mul
+        moveto
+        0     0.5774 rmoveto
+        -0.5 -0.2887 rlineto
+        0    -0.5774 rlineto
+        0.5  -0.2887 rlineto
+        0.5   0.2887 rlineto
+        0     0.5774 rlineto
+        -0.5  0.2887 rlineto
+        closepath
+    }} forall
+    fill
+
+    % Plot the locator symbol
+    newpath 14 13.8576 0.5774 0 360 arc closepath
+    14 13.8576 1.3359 360 0 arcn closepath fill
+    newpath 14 13.8576 2.1058 0 360 arc closepath
+    14 13.8576 2.8644 360 0 arcn closepath fill
+    newpath 14 13.8576 3.6229 0 360 arc closepath
+    14 13.8576 4.3814 360 0 arcn closepath fill
+
+    grestore
+
+    end
+
+}} bind def
+/renmaximatrix dup load /uk.co.terryburton.bwipp defineresource pop
+end
+/setpacking where {{pop setpacking}} if
+%%EndData
+%%EndResource
+% --END RENDERER renmaximatrix--
+
+
+
+% --BEGIN ENCODER interleaved2of5--
+% --REQUIRES preamble raiseerror renlinear--
+% --DESC: Interleaved 2 of 5 (ITF)
+% --EXAM: 2401234567
+% --EXOP: height=0.5 includecheck includetext includecheckintext
+% --RNDR: renlinear
+%%BeginResource: uk.co.terryburton.bwipp interleaved2of5 0.0 2016060300 65832 65492
+%%BeginData:        150 ASCII Lines
+/setpacking where {{pop currentpacking true setpacking}} if
+1 dict
+dup /raiseerror dup /uk.co.terryburton.bwipp findresource put
+dup /renlinear dup /uk.co.terryburton.bwipp findresource put
+begin
+/interleaved2of5 {{
+
+    20 dict begin         % Confine variables to local scope
+
+    /options exch def               % We are given an option string
+    /barcode exch def               % We are given a barcode string
+
+    /dontdraw false def
+    /includecheck false def         % Enable/disable checkdigit
+    /includetext false def          % Enable/disable text
+    /includecheckintext false def
+    /textfont /Courier def
+    /textsize 10 def
+    /textyoffset -7 def
+    /height 1 def
+    
+    % Parse the input options
+    options type /stringtype eq {{
+        1 dict begin
+        options {{
+            token false eq {{exit}} if dup length string cvs (=) search
+            true eq {{cvlit exch pop exch def}} {{cvlit true def}} ifelse
+        }} loop
+        currentdict end /options exch def
+    }} if
+    options {{def}} forall
+    
+    /textfont textfont cvlit def
+    /textsize textsize cvr def
+    /textyoffset textyoffset cvr def
+    /height height cvr def
+
+    % Validate the input
+    barcode {{
+        dup 48 lt exch 57 gt or {{
+            /bwipp.interleaved2of5badCharacter (Interleaved 2 of 5 must contain only digits) //raiseerror exec
+        }} if
+    }} forall
+    
+    /barlen barcode length def      % Length of the code
+
+    % Prefix 0 to barcode if length is even and including checkdigit
+    % or length is odd and not including checkdigit
+    barlen 2 mod 0 eq includecheck and          % even & includecheck
+    barlen 2 mod 0 ne includecheck not and or {{ % odd  & !includecheck
+        /pad barlen 1 add string def  % Create pad one bigger than barcode
+        pad 0 48 put                  % Put ascii 0 at start of pad
+        pad 1 barcode putinterval     % Add barcode to the end of pad
+        /barcode pad def              % barcode=pad
+        /barlen barlen 1 add def      % barlen++
+    }} if
+
+    % Add checksum to end of barcode
+    includecheck {{
+        /checksum 0 def
+        0 1 barlen 1 sub {{
+            /i exch def
+            i 2 mod 0 eq {{
+                /checksum checksum barcode i get 48 sub 3 mul add def
+            }} {{
+                /checksum checksum barcode i get 48 sub add def
+            }} ifelse
+        }} for
+        /checksum 10 checksum 10 mod sub 10 mod def
+        /pad barlen 1 add string def    % Create pad one bigger than barcode
+        pad 0 barcode putinterval       % Add barcode to the start of pad
+        pad barlen checksum 48 add put  % Add checksum to end of pad
+        /barcode pad def                % barcode=pad
+        /barlen barlen 1 add def        % barlen++
+    }} if
+
+    % Create an array containing the character mappings
+    /encs
+    [ (11221) (21112) (12112) (22111) (11212)
+      (21211) (12211) (11122) (21121) (12121)
+      (1111)  (2111)
+    ] def
+
+    % Create a string of the available characters
+    /barchars (0123456789) def
+    /sbs barlen 5 mul 8 add string def
+    /txt barlen array def
+
+    % Put the start character
+    sbs 0 encs 10 get putinterval
+
+    0 2 barlen 1 sub {{
+    /i exch def
+        % Lookup the encodings for two consecutive barcode characters
+        barcode i 1 getinterval barchars exch search
+        pop                           % Discard true leaving pre
+        length /indx exch def         % indx is the length of pre
+        pop pop                       % Discard seek and post
+        /enca encs indx get def       % Get the indxth encoding
+
+        barcode i 1 add 1 getinterval barchars exch search
+        pop                           % Discard true leaving pre
+        length /indx exch def         % indx is the length of pre
+        pop pop                       % Discard seek and post
+        /encb encs indx get def       % Get the indxth encoding
+
+        % Interleave the two character encodings
+        /intl enca length 2 mul string def
+        0 1 enca length 1 sub {{
+            /j exch def
+            /achar enca j get def
+            /bchar encb j get def
+            intl j 2 mul achar put
+            intl j 2 mul 1 add bchar put
+        }} for
+
+        sbs i 5 mul 4 add intl putinterval   % Put encoded digit into sbs
+        txt i [barcode i 1 getinterval i 9 mul 4 add textyoffset textfont textsize] put
+        includecheck includecheckintext not and barlen 2 sub i eq and {{
+            txt i 1 add [( ) i 1 add 9 mul 4 add textyoffset textfont textsize] put
+        }} {{
+            txt i 1 add [barcode i 1 add 1 getinterval i 1 add 9 mul 4 add textyoffset textfont textsize] put
+        }} ifelse
+    }} for
+
+    % Put the end character
+    sbs barlen 5 mul 4 add encs 11 get putinterval
+
+    % Return the arguments
+    <<
+    /ren //renlinear
+    /sbs [sbs {{48 sub}} forall]
+    /bhs [sbs length 1 add 2 idiv {{height}} repeat]
+    /bbs [sbs length 1 add 2 idiv {{0}} repeat]
+    includetext {{
+        /txt txt
+    }} if
+    /barratio 2
+    /spaceratio 2
+    /opt options
+    >>
+
+    dontdraw not //renlinear if
+
+    end
+
+}} bind def
+/interleaved2of5 dup load /uk.co.terryburton.bwipp defineresource pop
+end
+/setpacking where {{pop setpacking}} if
+%%EndData
+%%EndResource
+% --END ENCODER interleaved2of5--
+
+% YOU CAN EDIT BELOW THIS LINE! BANANASPLIT
+%
+% This is a template that is fed to a python script
+%
+% Legend:
+% {{0}}}}: biblionumber
+% {{1}}}}: title
+% {{2}}}}: publication year
+% {{3}}}}: creator
+% {{4}}}}: holding branch
+% {{5}}}}: shelfmark
+% {{6}}}}: barcode string
+% {{7}}}}: copy number
+
+%set the label size (this is 89 * 36 mm)
+<< /PageSize [102 252] >>
+setpagedevice
+
+%Encode the font to use Latin1 (8859-1)
+/HelveticaLatin
+  << /Helvetica findfont {{}} forall >>
+  begin
+    /Encoding ISOLatin1Encoding 256 array copy def currentdict
+  end
+definefont pop
+
+%set font size to 10 pt
+/HelveticaLatin 10 selectfont
+
+%rotate the document
+0 0 translate
+90 rotate
+
+%shelfmark string
+newpath
+7 -14 moveto
+({5}) show
+
+%title
+newpath
+7 -26 moveto
+({1}) show
+
+%creator
+newpath
+7 -38 moveto
+({2}) show
+
+%publication year
+newpath
+7 -50 moveto
+({3}) show
+
+%holding branch
+newpath
+35 -50 moveto
+({4}) show
+
+%biblionumber
+newpath
+65 -50 moveto
+({0}) show
+
+%copy number
+newpath
+110 -50 moveto
+(eks.nr. {7}) show
+
+%barcode
+7 -90 moveto ({6}) (includetext height=0.45)
+/interleaved2of5 /uk.co.terryburton.bwipp findresource exec
+
+%shelfmark spine
+230 -96 translate
+90 rotate
+newpath
+0 0 moveto
+({5}) show
+
+showpage
